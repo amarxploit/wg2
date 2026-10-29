@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09090b"><title>SKYGRID · Your Files. Your Space.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+  <a class="brand" href="#"><span class="brand-mark">S</span><span>SKY<span class="accent">GRID</span><small>Your files. Your space.</small></span></a>
+  <button class="upload-btn" id="uploadTop">＋ <span>Upload files</span></button>
+  <div class="nav-label">WORKSPACE</div>
+  <nav>
+    <button class="nav-item active" data-view="all"><span>▦</span> All files <kbd>⌘ 1</kbd></button>
+    <button class="nav-item" data-view="photos"><span>▧</span> Photos</button>
+    <button class="nav-item" data-view="videos"><span>▷</span> Videos</button>
+    <button class="nav-item" data-view="shared"><span>♧</span> Shared with me</button>
+    <button class="nav-item" data-view="groups"><span>◎</span> Shared spaces</button>
+  </nav>
+  <div class="sidebar-bottom"><div class="storage-head"><span>Storage</span><span class="muted">Prototype</span></div><div class="storage-track"><span></span></div><p class="muted small">Connect a storage provider to see usage.</p><button class="profile"><span class="avatar">A</span><span><b>Amar</b><small>Personal workspace</small></span><span class="dots">···</span></button></div>
+</aside>
+<main class="main">
+  <header class="topbar"><div class="crumb">Workspace <span>/</span> <b id="crumbTitle">All files</b></div><div class="top-actions"><button class="icon-btn" title="Notifications">♧</button><div class="avatar small-avatar">A</div></div></header>
+  <section class="welcome"><div><div class="eyebrow"><span class="live-dot"></span> YOUR PERSONAL CLOUD</div><h1>Everything, in <span>one space.</span></h1><p>Photos, videos, and memories. All organised, all yours.</p></div><button class="primary-btn" id="uploadHero">＋ Upload files</button></section>
+  <section class="connect-card"><div class="connect-icon">↗</div><div class="connect-copy"><b>Connect to your cloud</b><p id="connectText">Wake the backend and check your storage connection before uploading.</p></div><div class="connect-right"><span class="status" id="status"><i></i> Not connected</span><button class="secondary-btn" id="connectBtn">Connect</button></div></section>
+  <section class="section-head"><div><h2 id="sectionTitle">Recent files</h2><p class="muted">Your latest uploads will appear here</p></div><div class="file-tools"><label class="search"><span>⌕</span><input id="search" placeholder="Search files..." aria-label="Search files"></label><button class="filter-btn">☷ <span>Filter</span></button><button class="view-btn active">▦</button><button class="view-btn">☰</button></div></section>
+  <section class="file-grid" id="fileGrid">
+    <div class="empty-state"><div class="empty-art"><div class="sun"></div><div class="mountain one"></div><div class="mountain two"></div><div class="cloud">☁</div></div><h3>Your space is waiting</h3><p>Connect your cloud, then upload your first photo or video.</p><button class="secondary-btn" id="emptyUpload">＋ Choose files</button></div>
+  </section>
+  <input type="file" id="fileInput" accept="image/*,video/*" multiple hidden>
+  <footer>SKYGRID <span>·</span> A quieter place for your memories.</footer>
+</main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script src="./app.js"></script>
+</body></html>

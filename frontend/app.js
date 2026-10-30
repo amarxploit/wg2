@@ -23,28 +23,28 @@ $('#connectBtn').addEventListener('click',wakeApi);$('#wakeBtn').addEventListene
 function startKeepAlive(){clearInterval(keepAliveTimer);const keepAlive=async()=>{try{await pingHealth(8000);if(!wakeInProgress)setConnected()}catch(e){if(!wakeInProgress)setOffline('Backend fetch failed. Tap Wake Up to retry.')}};keepAlive();keepAliveTimer=setInterval(keepAlive,10*60*1000)}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!wakeInProgress){pingHealth(5000).then(()=>setConnected()).catch(()=>setOffline('Backend fetch failed. Tap Wake Up to retry.'))}});
 startKeepAlive();
-/* SKYGRID authentication: email/password, JWT persistence, and session restore. */
+/* SKYGRID Telegram OTP authentication. */
 (function setupAuth(){
- const gate=document.querySelector('#authGate'), form=document.querySelector('#authForm');
+ const gate=$('#authGate'),form=$('#authForm');
  if(!gate||!form)return;
- const nameWrap=document.querySelector('#nameWrap'),nameInput=document.querySelector('#authName');
- const emailInput=document.querySelector('#authEmail'),passwordInput=document.querySelector('#authPassword');
- const error=document.querySelector('#authError'),submit=document.querySelector('#authSubmit');
- const title=document.querySelector('#authTitle'),subtitle=document.querySelector('#authSubtitle'),switchText=document.querySelector('#authSwitch');
- const modeBtn=document.querySelector('#authModeBtn');
- let mode='login',busy=false;
+ const phone=$('#authPhone'),code=$('#authCode'),password=$('#authTelegramPassword');
+ const codeWrap=$('#codeWrap'),passwordWrap=$('#passwordWrap');
+ const error=$('#authError'),submit=$('#authSubmit'),title=$('#authTitle'),subtitle=$('#authSubtitle'),switchText=$('#authSwitch');
  const tokenKey='skygrid_access_token';
- function showError(message){error.textContent=message}
- function setMode(next){
-  mode=next;showError('');nameWrap.hidden=mode!=='register';
-  nameInput.required=mode==='register';passwordInput.autocomplete=mode==='register'?'new-password':'current-password';
-  title.innerHTML=mode==='login'?'Welcome to <span>SKYGRID</span>':'Create your <span>SKYGRID</span> account';
-  subtitle.textContent=mode==='login'?'Sign in to access your workspace.':'Create an account to get started.';
-  submit.textContent=mode==='login'?'Sign in':'Create account';
-  switchText.firstChild.textContent=mode==='login'?'New to SKYGRID? ':'Already registered? ';
-  modeBtn.textContent=mode==='login'?'Create account':'Sign in';
+ let phase='phone',challengeId='',busy=false;
+ function showError(message){error.textContent=message||''}
+ function setPhase(next){
+  phase=next;showError('');
+  codeWrap.hidden=phase==='phone';
+  passwordWrap.hidden=phase!=='password';
+  phone.disabled=phase!=='phone';
+  code.required=phase==='code';
+  password.required=phase==='password';
+  title.innerHTML=phase==='phone'?'Welcome to <span>SKYGRID</span>':phase==='code'?'Verify your <span>Telegram</span> code':'Telegram <span>2-step verification</span>';
+  subtitle.textContent=phase==='phone'?'Sign in securely using your Telegram account.':phase==='code'?'Enter the code Telegram sent you.':'Enter your Telegram 2-step verification password.';
+  submit.textContent=phase==='phone'?'Send Telegram code':phase==='code'?'Verify and sign in':'Verify password';
+  switchText.textContent=phase==='phone'?'Your code is sent by Telegram. Never share it with anyone.':'If the request expires, reload the page and start again.';
  }
- modeBtn.addEventListener('click',()=>setMode(mode==='login'?'register':'login'));
  function enter(user){
   gate.hidden=true;
   const displayName=user?.display_name||user?.email?.split('@')[0]||'User';
@@ -53,7 +53,7 @@ startKeepAlive();
   notify('Signed in successfully.');
  }
  async function request(path,options={}){
-  const response=await fetch(apiBase()+path,{...options,headers:{'Content-Type':'application/json',...(options.headers||{})},signal:AbortSignal.timeout(12000)});
+  const response=await fetch(apiBase()+path,{...options,headers:{'Content-Type':'application/json',...(options.headers||{})},signal:AbortSignal.timeout(15000)});
   let data={};try{data=await response.json()}catch{}
   if(!response.ok)throw new Error(data.detail||'Request failed ('+response.status+').');
   return data;
@@ -61,30 +61,30 @@ startKeepAlive();
  async function restore(){
   const token=localStorage.getItem(tokenKey);
   if(!token){gate.hidden=false;return}
-  try{
-   const user=await request('/auth/me',{headers:{Authorization:'Bearer '+token}});
-   enter(user);
-  }catch(e){localStorage.removeItem(tokenKey);gate.hidden=false;showError('Session expired. Please sign in again.')}
+  try{const user=await request('/auth/me',{headers:{Authorization:'Bearer '+token}});enter(user)}
+  catch(e){localStorage.removeItem(tokenKey);gate.hidden=false;showError('Session expired. Please sign in again.')}
  }
  form.addEventListener('submit',async e=>{
   e.preventDefault();if(busy)return;busy=true;submit.disabled=true;showError('');
-  const email=emailInput.value.trim().toLowerCase(),password=passwordInput.value;
   try{
-   if(mode==='register'){
-    await request('/auth/register',{method:'POST',body:JSON.stringify({email,display_name:nameInput.value.trim(),password})});
+   if(phase==='phone'){
+    const result=await request('/auth/telegram/send-code',{method:'POST',body:JSON.stringify({phone:phone.value.trim()})});
+    challengeId=result.challenge_id;setPhase('code');code.focus();notify('Telegram verification code requested.');
+   }else{
+    const body={challenge_id:challengeId};
+    if(phase==='code')body.code=code.value.trim();
+    if(phase==='password')body.password=password.value;
+    const result=await request('/auth/telegram/verify-code',{method:'POST',body:JSON.stringify(body)});
+    if(result.requires_password){setPhase('password');password.focus();return}
+    if(!result.access_token)throw new Error('API ne access token return nahi kiya.');
+    localStorage.setItem(tokenKey,result.access_token);
+    const user=await request('/auth/me',{headers:{Authorization:'Bearer '+result.access_token}});
+    enter(user);
    }
-   const body=new URLSearchParams({username:email,password});
-   const response=await fetch(apiBase()+'/auth/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body,signal:AbortSignal.timeout(12000)});
-   let data={};try{data=await response.json()}catch{}
-   if(!response.ok)throw new Error(data.detail||'Sign-in failed ('+response.status+').');
-   if(!data.access_token)throw new Error('API ne access token return nahi kiya.');
-   localStorage.setItem(tokenKey,data.access_token);
-   const user=await request('/auth/me',{headers:{Authorization:'Bearer '+data.access_token}});
-   enter(user);
   }catch(err){
    const message=err.name==='TimeoutError'||err.name==='AbortError'?'Backend timeout. Wake Up karke dobara try karo.':err.message;
    showError(message==='Failed to fetch'?'Backend tak fetch nahi pahucha. API/CORS status check karo.':message);
   }finally{busy=false;submit.disabled=false}
  });
- restore();
+ setPhase('phone');restore();
 })();

@@ -38,13 +38,13 @@
   <form class="auth-card" id="authForm">
     <div class="auth-mark">S</div><p class="auth-eyebrow">YOUR PERSONAL CLOUD</p>
     <h2 id="authTitle">Welcome to <span>SKYGRID</span></h2>
-    <p class="auth-subtitle" id="authSubtitle">Sign in to access your workspace.</p>
-    <label id="nameWrap" hidden>Display name<input id="authName" autocomplete="name" maxlength="80" placeholder="Your name"></label>
-    <label>Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
-    <label>Password<input id="authPassword" type="password" autocomplete="current-password" minlength="10" maxlength="128" required placeholder="At least 10 characters"></label>
+    <p class="auth-subtitle" id="authSubtitle">Sign in securely using your Telegram account.</p>
+    <label id="phoneWrap">Telegram phone number<input id="authPhone" type="tel" autocomplete="tel" required placeholder="+91 98765 43210"></label>
+    <label id="codeWrap" hidden>Telegram verification code<input id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="Enter code"></label>
+    <label id="passwordWrap" hidden>Telegram 2-step verification password<input id="authTelegramPassword" type="password" autocomplete="current-password" maxlength="256" placeholder="Your Telegram 2FA password"></label>
     <p class="auth-error" id="authError" aria-live="polite"></p>
-    <button class="primary-btn auth-submit" id="authSubmit" type="submit">Sign in</button>
-    <p class="auth-switch" id="authSwitch">New to SKYGRID? <button type="button" id="authModeBtn">Create account</button></p>
+    <button class="primary-btn auth-submit" id="authSubmit" type="submit">Send Telegram code</button>
+    <p class="auth-switch" id="authSwitch">Your code is sent by Telegram. Never share it with anyone.</p>
   </form>
 </section>
 <div class="toast" id="toast" role="status"></div>

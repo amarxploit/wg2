@@ -2,7 +2,7 @@ name: SKYGRID API Health Monitor
 
 on:
   schedule:
-    # Scheduled checks are best-effort; GitHub may delay scheduled workflows.
+    # GitHub scheduled workflows are best-effort and may be delayed.
     - cron: "*/10 * * * *"
   workflow_dispatch:
 
@@ -16,13 +16,9 @@ jobs:
     steps:
       - name: Check SKYGRID API health
         env:
-          SKYGRID_API_URL: ${{ vars.SKYGRID_API_URL }}
+          SKYGRID_API_URL: https://skygrid-backend.onrender.com
         run: |
           set -eu
-          if [ -z "${SKYGRID_API_URL:-}" ]; then
-            echo "Missing repository variable SKYGRID_API_URL. Set it to the base URL of the Render API (without a trailing slash)."
-            exit 1
-          fi
           url="${SKYGRID_API_URL%/}/health"
           echo "Checking ${url}"
           code="$(curl --silent --show-error --location --max-time 20 --output /tmp/health.json --write-out '%{http_code}' "$url")"

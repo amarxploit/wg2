@@ -34,6 +34,19 @@
   <footer>SKYGRID <span>·</span> A quieter place for your memories.</footer>
 </main>
 </div>
+<section class="auth-gate" id="authGate" aria-modal="true" role="dialog" aria-labelledby="authTitle">
+  <form class="auth-card" id="authForm">
+    <div class="auth-mark">S</div><p class="auth-eyebrow">YOUR PERSONAL CLOUD</p>
+    <h2 id="authTitle">Welcome to <span>SKYGRID</span></h2>
+    <p class="auth-subtitle" id="authSubtitle">Sign in to access your workspace.</p>
+    <label id="nameWrap" hidden>Display name<input id="authName" autocomplete="name" maxlength="80" placeholder="Your name"></label>
+    <label>Email<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+    <label>Password<input id="authPassword" type="password" autocomplete="current-password" minlength="10" maxlength="128" required placeholder="At least 10 characters"></label>
+    <p class="auth-error" id="authError" aria-live="polite"></p>
+    <button class="primary-btn auth-submit" id="authSubmit" type="submit">Sign in</button>
+    <p class="auth-switch" id="authSwitch">New to SKYGRID? <button type="button" id="authModeBtn">Create account</button></p>
+  </form>
+</section>
 <div class="toast" id="toast" role="status"></div>
 <script src="./app.js"></script>
 </body></html>

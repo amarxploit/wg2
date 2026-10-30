@@ -1,0 +1,35 @@
+name: SKYGRID API Health Monitor
+
+on:
+  schedule:
+    # Scheduled checks are best-effort; GitHub may delay scheduled workflows.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check SKYGRID API health
+        env:
+          SKYGRID_API_URL: ${{ vars.SKYGRID_API_URL }}
+        run: |
+          set -eu
+          if [ -z "${SKYGRID_API_URL:-}" ]; then
+            echo "Missing repository variable SKYGRID_API_URL. Set it to the base URL of the Render API (without a trailing slash)."
+            exit 1
+          fi
+          url="${SKYGRID_API_URL%/}/health"
+          echo "Checking ${url}"
+          code="$(curl --silent --show-error --location --max-time 20 --output /tmp/health.json --write-out '%{http_code}' "$url")"
+          cat /tmp/health.json
+          echo
+          if [ "$code" != "200" ]; then
+            echo "Health check failed with HTTP ${code}."
+            exit 1
+          fi
+          echo "SKYGRID API returned HTTP 200."

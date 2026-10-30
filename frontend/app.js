@@ -35,7 +35,7 @@ startKeepAlive();
  function showError(message){error.textContent=message||''}
  function setPhase(next){
   phase=next;showError('');
-  codeWrap.hidden=phase==='phone';
+  codeWrap.hidden=phase==='phone'||phase==='password';
   passwordWrap.hidden=phase!=='password';
   phone.disabled=phase!=='phone';
   code.required=phase==='code';
